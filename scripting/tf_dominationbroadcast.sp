@@ -2,11 +2,12 @@
 * No Domination Broadcast by Root
 *
 * Description:
-*   Disables "Domination & Revenge" features in Team Fortress 2
+*   Disables "Domination & Revenge" features in Team Fortress 2.
 *
 * Version 1.2.1
 * Changelog & more info at http://goo.gl/4nKhJ
 */
+
 
 #pragma semicolon 1
 
@@ -31,7 +32,7 @@ public Plugin:myinfo =
 {
 	name        = "No Domination Broadcast",
 	author      = "Root",
-	description = "Disables Domination & Revenge broadcasting in TF2",
+	description = "Disables Domination & Revenge broadcasting",
 	version     = PLUGIN_VERSION,
 	url         = "forums.alliedmods.net/showthread.php?p=1807594"
 };
@@ -45,13 +46,13 @@ public OnPluginStart()
 {
 	// Create console variables
 	CreateConVar("sm_nodominations_version", PLUGIN_VERSION, NULL_STRING, FCVAR_NOTIFY|FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED);
-	nobroadcast = CreateConVar("sm_nodominations", "1", "Disable Dominations & Revenges?", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	nobroadcast = CreateConVar("sm_nodominations", "1", "Disable Domination & Revenge broadcasting?", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 
-	// Always use event hook mode 'Pre' if want to block or rewrite an event
+	// Always use event hook mode 'Pre' if need to block or rewrite an event
 	HookEvent("player_death",     OnPlayerDeath, EventHookMode_Pre);
 	HookConVarChange(nobroadcast, OnConVarChange);
 
-	// Find the netprops
+	// Find the NetProps
 	m_bPlayerDominated    = GetSendPropInfo("CTFPlayer", "m_bPlayerDominated");
 	m_bPlayerDominatingMe = GetSendPropInfo("CTFPlayer", "m_bPlayerDominatingMe");
 	m_iActiveDominations  = GetSendPropInfo("CTFPlayerResource", "m_iActiveDominations");
@@ -70,7 +71,7 @@ public OnPluginStart()
  * -------------------------------------------------------------------- */
 public OnLibraryAdded(const String:name[])
 {
-	// Check if 'updater' lib is avalible
+	// Check if 'updater' library is avalible
 	if (StrEqual(name, "updater"))
 	{
 		Updater_AddPlugin(UPDATE_URL);
@@ -88,16 +89,16 @@ public OnConfigsExecuted()
 
 	if (GetConVarBool(nobroadcast))
 	{
-		// If resource entity is valid, hook it
+		// Check if resource entity is valid then hook it
 		if (entity != -1)
 		{
 			SDKHook(entity, SDKHook_ThinkPost, OnThinkPost);
 		}
 
-		// Stop plugin if "tf_player_manager" is not avalible
+		// Disable plugin if CPlayerResource entity is invalid or N/A
 		else
 		{
-			SetFailState("Unable to find CPlayerResource entity!");
+			SetFailState("Unable to find resource entity!");
 		}
 	}
 }
@@ -110,16 +111,15 @@ public OnConVarChange(Handle:convar, const String:oldValue[], const String:newVa
 {
 	// See tf2 include file
 	new entity = TF2_GetResourceEntity();
-	new change = StringToInt(newValue);
 
-	switch (change)
+	switch (StringToInt(newValue))
 	{
 		case 0: // Unhook all features if convar value changed to 0
 		{
 			SDKUnhook(entity, SDKHook_ThinkPost, OnThinkPost);
 			UnhookEvent("player_death", OnPlayerDeath, EventHookMode_Pre);
 		}
-		case 1: // If changed to 1, hook everything back
+		case 1: // If changed to 1 - hook everything back
 		{
 			SDKHook(entity, SDKHook_ThinkPost, OnThinkPost);
 			HookEvent("player_death", OnPlayerDeath, EventHookMode_Pre);
