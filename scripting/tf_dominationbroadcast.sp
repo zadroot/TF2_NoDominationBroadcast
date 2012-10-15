@@ -8,7 +8,7 @@
 * Changelog & more info at http://goo.gl/4nKhJ
 */
 
-#pragma semicolon 1 // Force strict semicolon mode.
+#pragma semicolon 1
 
 // ====[ INCLUDES ]===================================================
 #include <sourcemod>
@@ -19,7 +19,7 @@
 
 // ====[ CONSTANTS ]==================================================
 #define PLUGIN_VERSION "1.2.1"
-#define UPDATE_URL	   "https://github.com/zadroot/TF2_NoDominationBroadcast/updater.txt"
+#define UPDATE_URL	   "https://raw.github.com/zadroot/TF2_NoDominationBroadcast/master/updater.txt"
 
 // ====[ VARIABLES ]==================================================
 new Handle:nobroadcast = INVALID_HANDLE;
@@ -31,9 +31,9 @@ public Plugin:myinfo =
 {
 	name        = "No Domination Broadcast",
 	author      = "Root",
-	description = "Disables Domination & Revenge broadcasting",
+	description = "Disables Domination & Revenge broadcasting in TF2",
 	version     = PLUGIN_VERSION,
-	url         = "http://steamcommunity.com/id/zadroot/"
+	url         = "forums.alliedmods.net/showthread.php?p=1807594"
 };
 
 
@@ -48,7 +48,7 @@ public OnPluginStart()
 	nobroadcast = CreateConVar("sm_nodominations", "1", "Disable Dominations & Revenges?", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 
 	// Always use event hook mode 'Pre' if want to block or rewrite an event
-	HookEvent("player_death",      OnPlayerDeath, EventHookMode_Pre);
+	HookEvent("player_death",     OnPlayerDeath, EventHookMode_Pre);
 	HookConVarChange(nobroadcast, OnConVarChange);
 
 	// Find the netprops
@@ -70,7 +70,7 @@ public OnPluginStart()
  * -------------------------------------------------------------------- */
 public OnLibraryAdded(const String:name[])
 {
-	// Check if 'updater' is avalible
+	// Check if 'updater' lib is avalible
 	if (StrEqual(name, "updater"))
 	{
 		Updater_AddPlugin(UPDATE_URL);
@@ -94,7 +94,7 @@ public OnConfigsExecuted()
 			SDKHook(entity, SDKHook_ThinkPost, OnThinkPost);
 		}
 
-		// Stop plugin if resource manager is not avalible
+		// Stop plugin if "tf_player_manager" is not avalible
 		else
 		{
 			SetFailState("Unable to find CPlayerResource entity!");
@@ -192,7 +192,7 @@ GetSendPropInfo(const String:serverClass[64], const String:propName[64])
 	// Log an error and disable plugin if a networkable send property offset was not found
 	if (!entity)
 	{
-		SetFailState("Unable to find prop: \"%s:%s\"!", serverClass, propName);
+		SetFailState("Unable to find prop \"%s:%s\"!", serverClass, propName);
 	}
 
 	// Return value
