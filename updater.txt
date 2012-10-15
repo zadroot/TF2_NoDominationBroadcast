@@ -1,0 +1,25 @@
+"Updater"
+{
+	"Information"
+	{
+		"Version"
+		{
+			"Latest"		"1.2.1"
+			"Previous"		"1.2"
+		}
+
+		"Notes"	"Changes in 1.2.1:"
+		"Notes"	"Fixed a very minor bug with updater"
+		"Notes"	"Fixed an issue when m_iActiveDominations count reset when sm_nodominations is set to 0"
+		"Notes"	"Improved CTFPlayerResource entity via TF2_GetResourceEntity()"
+		"Notes"	"Small improvements with HookConVarChange"
+		"Notes"	"Other: URL for update are on github now!"
+	}
+
+	"Files"
+	{
+		"Plugin"		"Path_SM/plugins/tf_dominationbroadcast.smx"
+
+		"Source"		"Path_SM/scripting/tf_dominationbroadcast.sp"
+	}
+}
