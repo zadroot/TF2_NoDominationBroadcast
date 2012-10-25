@@ -8,12 +8,12 @@
 * Changelog & more info at http://goo.gl/4nKhJ
 */
 
-
 #pragma semicolon 1
 
 // ====[ INCLUDES ]===================================================
 #include <sourcemod>
 #include <tf2_stocks> // <tf2_stocks> is automatically includes sdktools.inc and tf2.inc
+
 #include <sdkhooks>
 #undef REQUIRE_PLUGIN
 #include <updater>
