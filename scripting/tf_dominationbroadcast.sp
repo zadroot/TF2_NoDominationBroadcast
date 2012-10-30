@@ -10,7 +10,7 @@
 
 #pragma semicolon 1
 
-// ====[ INCLUDES ]===================================================
+// ====[ INCLUDES ]====================================================
 #include <sourcemod>
 #include <tf2_stocks> // <tf2_stocks> is automatically includes sdktools.inc and tf2.inc
 
@@ -18,19 +18,20 @@
 #undef REQUIRE_PLUGIN
 #include <updater>
 
-// ====[ CONSTANTS ]==================================================
+// ====[ CONSTANTS ]===================================================
+#define PLUGIN_NAME    "No Domination Broadcast"
 #define PLUGIN_VERSION "1.2.1"
-#define UPDATE_URL	   "https://raw.github.com/zadroot/TF2_NoDominationBroadcast/master/updater.txt"
+#define UPDATE_URL     "https://raw.github.com/zadroot/TF2_NoDominationBroadcast/master/updater.txt"
 
-// ====[ VARIABLES ]==================================================
+// ====[ VARIABLES ]===================================================
 new Handle:nobroadcast = INVALID_HANDLE;
 new m_bPlayerDominated, m_bPlayerDominatingMe, m_iActiveDominations; // NetProps
 new zeroCount[MAXPLAYERS + 1];
 
-// ====[ PLUGIN ]=====================================================
+// ====[ PLUGIN ]======================================================
 public Plugin:myinfo =
 {
-	name        = "No Domination Broadcast",
+	name        = PLUGIN_NAME,
 	author      = "Root",
 	description = "Disables Domination & Revenge broadcasting",
 	version     = PLUGIN_VERSION,
@@ -45,7 +46,7 @@ public Plugin:myinfo =
 public OnPluginStart()
 {
 	// Create console variables
-	CreateConVar("sm_nodominations_version", PLUGIN_VERSION, NULL_STRING, FCVAR_NOTIFY|FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED);
+	CreateConVar("sm_nodominations_version", PLUGIN_VERSION, PLUGIN_NAME, FCVAR_NOTIFY|FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED);
 	nobroadcast = CreateConVar("sm_nodominations", "1", "Disable Domination & Revenge broadcasting?", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 
 	// Always use event hook mode 'Pre' if need to block or rewrite an event
@@ -67,7 +68,7 @@ public OnPluginStart()
 
 /* OnLibraryAdded()
  *
- * Called after a library is added that the current plugin references optionally.
+ * Called after a library is added that the current plugin references.
  * -------------------------------------------------------------------- */
 public OnLibraryAdded(const String:name[])
 {
@@ -84,7 +85,7 @@ public OnLibraryAdded(const String:name[])
  * -------------------------------------------------------------------- */
 public OnConfigsExecuted()
 {
-	// Retrieves the entity index of the CPlayerResource entity
+	// Retrieves the entity index of the PlayerResource entity
 	new entity = TF2_GetResourceEntity();
 
 	if (GetConVarBool(nobroadcast))
@@ -95,7 +96,7 @@ public OnConfigsExecuted()
 			SDKHook(entity, SDKHook_ThinkPost, OnThinkPost);
 		}
 
-		// Disable plugin if CPlayerResource entity is invalid or N/A
+		// Disable plugin if PlayerResource entity is invalid or N/A
 		else
 		{
 			SetFailState("Unable to find resource entity!");
@@ -109,7 +110,7 @@ public OnConfigsExecuted()
  * -------------------------------------------------------------------- */
 public OnConVarChange(Handle:convar, const String:oldValue[], const String:newValue[])
 {
-	// See tf2 include file
+	// See the tf2 api for this
 	new entity = TF2_GetResourceEntity();
 
 	switch (StringToInt(newValue))
@@ -137,7 +138,7 @@ public Action:OnPlayerDeath(Handle:event, const String:name[], bool:dontBroadcas
 	new attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
 	new victim   = GetClientOfUserId(GetEventInt(event, "userid"));
 
-	// Way to get dominations and revenges is deathflags
+	// Way to get dominations and revenges is death_flags
 	new death_flags = GetEventInt(event, "death_flags");
 
 	// Thanks to FaTony for this!
@@ -162,7 +163,7 @@ public OnThinkPost(entity)
 
 /* SetNetProps()
  *
- * Sets net properites/resource entity for dominations and revenges.
+ * Sets net properites for dominations and revenges.
  * -------------------------------------------------------------------- */
 SetNetProps(attacker, victim)
 {
@@ -192,9 +193,8 @@ GetSendPropInfo(const String:serverClass[64], const String:propName[64])
 	// Log an error and disable plugin if a networkable send property offset was not found
 	if (!entity)
 	{
-		SetFailState("Unable to find prop \"%s:%s\"!", serverClass, propName);
+		SetFailState("Unable to find prop \"%s::%s\"!", serverClass, propName);
 	}
 
-	// Return value
 	return entity;
 }
