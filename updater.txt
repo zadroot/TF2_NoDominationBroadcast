@@ -4,22 +4,20 @@
 	{
 		"Version"
 		{
-			"Latest"		"1.2.1"
-			"Previous"		"1.2"
+			"Latest"		"1.2.2"
+			"Previous"		"1.2.1"
 		}
 
-		"Notes"	"Changes in 1.2.1:"
-		"Notes"	"Fixed a very minor bug with updater"
-		"Notes"	"Fixed an issue when m_iActiveDominations count reset when sm_nodominations is set to 0"
-		"Notes"	"Improved CTFPlayerResource entity via TF2_GetResourceEntity()"
-		"Notes"	"Small improvements with HookConVarChange"
-		"Notes"	"Other: URL for update are on github now!"
+		"Notes"	"Changes in 1.2.2:"
+		"Notes"	"Switched deprecated TF2_GetResourceEntity() to GetResourceEntity()"
+		"Notes"	"Fixed a typo in OnConfigsExecuted() forward"
+		"Notes"	"Slightly optimized plugin"
+		"Notes"	"Compiled against SM 1.5.0"
 	}
 
 	"Files"
 	{
 		"Plugin"		"Path_SM/plugins/tf_dominationbroadcast.smx"
-
 		"Source"		"Path_SM/scripting/tf_dominationbroadcast.sp"
 	}
 }

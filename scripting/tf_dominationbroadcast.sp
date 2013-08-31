@@ -11,7 +11,7 @@
 #pragma semicolon 1
 
 // ====[ INCLUDES ]==================================================
-#include <tf2_stocks> // <tf2_stocks> is automatically includes sdktools.inc and tf2.inc
+#include <tf2_stocks> // <tf2_stocks> is automatically includes <sdktools> and <tf2>
 #include <sdkhooks>
 #undef REQUIRE_PLUGIN
 #include <updater>
@@ -31,7 +31,7 @@ public Plugin:myinfo =
 {
 	name        = PLUGIN_NAME,
 	author      = "Root",
-	description = "Disables Domination and Revenge broadcasting",
+	description = "Disables Domination & Revenge broadcasting",
 	version     = PLUGIN_VERSION,
 	url         = "forums.alliedmods.net/showthread.php?p=1807594"
 };
@@ -47,7 +47,7 @@ public OnPluginStart()
 	CreateConVar("sm_nodominations_version", PLUGIN_VERSION, PLUGIN_NAME, FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	nobroadcast = CreateConVar("sm_nodominations", "1", "Disable Domination & Revenge broadcasting?", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 
-	// Always use event hook mode 'Pre' if you want to block or rewrite an event
+	// Always use event hook mode _Pre if you want to block or rewrite an event
 	HookEvent("player_death",     OnPlayerDeath, EventHookMode_Pre);
 	HookConVarChange(nobroadcast, OnConVarChange);
 
@@ -92,7 +92,7 @@ public OnConfigsExecuted()
 		// Check if resource entity is valid then hook it
 		if (entity != -1)
 		{
-			SDKHook(entity, SDKHook_ThinkPost, OnThinkPost);
+			SDKHook(entity, SDKHook_ThinkPost, OnResourceThink);
 		}
 
 		// Disable plugin if PlayerResource entity is invalid or N/A
@@ -117,12 +117,12 @@ public OnConVarChange(Handle:convar, const String:oldValue[], const String:newVa
 	{
 		case false: // Unhook all features main convar value was changed to 0
 		{
-			SDKUnhook(entity, SDKHook_ThinkPost, OnThinkPost);
+			SDKUnhook(entity, SDKHook_ThinkPost, OnResourceThink);
 			UnhookEvent("player_death", OnPlayerDeath, EventHookMode_Pre);
 		}
 		case true: // Otherwise hook everything back
 		{
-			SDKHook(entity, SDKHook_ThinkPost, OnThinkPost);
+			SDKHook(entity, SDKHook_ThinkPost, OnResourceThink);
 			HookEvent("player_death", OnPlayerDeath, EventHookMode_Pre);
 		}
 	}
@@ -155,7 +155,7 @@ public Action:OnPlayerDeath(Handle:event, const String:name[], bool:dontBroadcas
  *
  * A SDKHooks 'after think' feature.
  * ------------------------------------------------------------------ */
-public OnThinkPost(entity)
+public OnResourceThink(entity)
 {
 	// Copies an array of cells to an entity at a dominations offset
 	SetEntDataArray(entity, m_iActiveDominations, zeroCount, MaxClients + 1);
@@ -171,14 +171,14 @@ SetNetProps(attacker, victim)
 	if (attacker > 0 && IsClientInGame(attacker))
 	{
 		// First remove 'DOMINATED' icon in a scoreboard
-		SetEntData(attacker, m_bPlayerDominated + victim, 0, 4, true);
+		SetEntData(attacker, m_bPlayerDominated + victim, false, 4, true);
 	}
 
 	// And victim
 	if (victim > 0 && IsClientInGame(victim))
 	{
 		// Then remove 'NEMESIS' icon in a scoreboard
-		SetEntData(victim, m_bPlayerDominatingMe + attacker, 0, 4, true);
+		SetEntData(victim, m_bPlayerDominatingMe + attacker, false, 4, true);
 	}
 }
 
@@ -190,10 +190,10 @@ GetSendPropInfo(const String:serverClass[64], const String:propName[64])
 {
 	new entity = FindSendPropInfo(serverClass, propName);
 
-	// Log an error and disable plugin if a networkable send property offset wasnt found
+	// Disable plugin if a networkable send property offset wasnt found
 	if (!entity)
 	{
-		SetFailState("Unable to find prop \"%s::%s\"!", serverClass, propName);
+		SetFailState("Unable to find offs \"%s::%s\"!", serverClass, propName);
 	}
 
 	return entity;
