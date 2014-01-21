@@ -4,15 +4,11 @@
 	{
 		"Version"
 		{
-			"Latest"		"1.2.2"
-			"Previous"		"1.2.1"
+			"Latest"		"1.2.3"
+			"Previous"		"1.2.2"
 		}
 
-		"Notes"	"Changes in 1.2.2:"
-		"Notes"	"Switched deprecated TF2_GetResourceEntity() to GetResourceEntity()"
-		"Notes"	"Fixed a typo in OnConfigsExecuted() forward"
-		"Notes"	"Slightly optimized plugin"
-		"Notes"	"Compiled against SM 1.5.0"
+		"Notes"	"Small plugin enhancements"
 	}
 
 	"Files"

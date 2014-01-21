@@ -4,21 +4,19 @@
 * Description:
 *   Disables "Domination & Revenge" features in Team Fortress 2.
 *
-* Version 1.2.2
+* Version 1.2.3
 * Changelog & more info at http://goo.gl/4nKhJ
 */
-
-#pragma semicolon 1
 
 // ====[ INCLUDES ]==================================================
 #include <tf2_stocks> // <tf2_stocks> is automatically includes <sdktools> and <tf2>
 #include <sdkhooks>
 #undef REQUIRE_PLUGIN
-#include <updater>
+#tryinclude <updater>
 
 // ====[ CONSTANTS ]=================================================
 #define PLUGIN_NAME    "No Domination Broadcast"
-#define PLUGIN_VERSION "1.2.2"
+#define PLUGIN_VERSION "1.2.3"
 #define UPDATE_URL     "https://raw.github.com/zadroot/TF2_NoDominationBroadcast/master/updater.txt"
 
 // ====[ VARIABLES ]=================================================
@@ -47,23 +45,24 @@ public OnPluginStart()
 	CreateConVar("sm_nodominations_version", PLUGIN_VERSION, PLUGIN_NAME, FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	nobroadcast = CreateConVar("sm_nodominations", "1", "Disable Domination & Revenge broadcasting?", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 
-	// Always use event hook mode _Pre if you want to block or rewrite an event
+	// Always use pre hook mode if you want to block or rewrite an event
 	HookEvent("player_death",     OnPlayerDeath, EventHookMode_Pre);
 	HookConVarChange(nobroadcast, OnConVarChange);
 
-	// Find the Dominations/Revenge NetProps
-	m_bPlayerDominated    = GetSendPropInfo("CTFPlayer", "m_bPlayerDominated");
-	m_bPlayerDominatingMe = GetSendPropInfo("CTFPlayer", "m_bPlayerDominatingMe");
-	m_iActiveDominations  = GetSendPropInfo("CTFPlayerResource", "m_iActiveDominations");
+	// Find the Dominations/Revenge netprops
+	m_bPlayerDominated    = FindSendPropInfoEx("CTFPlayer",         "m_bPlayerDominated");
+	m_bPlayerDominatingMe = FindSendPropInfoEx("CTFPlayer",         "m_bPlayerDominatingMe");
+	m_iActiveDominations  = FindSendPropInfoEx("CTFPlayerResource", "m_iActiveDominations");
 
-	// Updater stuff
+#if defined _updater_included
 	if (LibraryExists("updater"))
 	{
 		// Add plugin to the updater
 		Updater_AddPlugin(UPDATE_URL);
 	}
+#endif
 }
-
+#if defined _updater_included
 /* OnLibraryAdded()
  *
  * Called after a library is added that the current plugin references.
@@ -76,29 +75,20 @@ public OnLibraryAdded(const String:name[])
 		Updater_AddPlugin(UPDATE_URL);
 	}
 }
-
+#endif
 /* OnMapStart()
  *
- * Called when the map has loaded.
+ * Called when the map has loaded and all plugin configs are done executing.
  * ------------------------------------------------------------------ */
 public OnConfigsExecuted()
 {
 	// Plugin is enabled?
 	if (GetConVarBool(nobroadcast))
 	{
-		// Retrieves the entity index of the PlayerResource entity
-		new entity = GetPlayerResourceEntity();
-
-		// Check if resource entity is valid then hook it
-		if (entity != -1)
+		// Make sure we can hook PlayerResourceEntity
+		if (!SDKHookEx(GetPlayerResourceEntity(), SDKHook_ThinkPost, OnResourceThink))
 		{
-			SDKHook(entity, SDKHook_ThinkPost, OnResourceThink);
-		}
-
-		// Disable plugin if PlayerResource entity is invalid or N/A
-		else
-		{
-			SetFailState("Unable to find resource entity!");
+			SetFailState("Unable to hook resource entity!");
 		}
 	}
 }
@@ -158,7 +148,7 @@ public Action:OnPlayerDeath(Handle:event, const String:name[], bool:dontBroadcas
 public OnResourceThink(entity)
 {
 	// Copies an array of cells to an entity at a dominations offset
-	SetEntDataArray(entity, m_iActiveDominations, zeroCount, MaxClients + 1);
+	SetEntDataArray(entity, m_iActiveDominations, zeroCount, MaxClients+1);
 }
 
 /* SetNetProps()
@@ -168,33 +158,33 @@ public OnResourceThink(entity)
 SetNetProps(attacker, victim)
 {
 	// Make sure attacker is valid
-	if (attacker > 0 && IsClientInGame(attacker))
+	if (attacker && IsClientInGame(attacker))
 	{
 		// First remove 'DOMINATED' icon in a scoreboard
 		SetEntData(attacker, m_bPlayerDominated + victim, false, 4, true);
 	}
 
 	// And victim
-	if (victim > 0 && IsClientInGame(victim))
+	if (victim && IsClientInGame(victim))
 	{
 		// Then remove 'NEMESIS' icon in a scoreboard
 		SetEntData(victim, m_bPlayerDominatingMe + attacker, false, 4, true);
 	}
 }
 
-/* GetSendPropInfo()
+/* FindSendPropInfoEx()
  *
  * Returns the offset of the specified network property.
  * ------------------------------------------------------------------ */
-GetSendPropInfo(const String:serverClass[64], const String:propName[64])
+FindSendPropInfoEx(const String:serverClass[64], const String:propName[64])
 {
-	new entity = FindSendPropInfo(serverClass, propName);
+	new info = FindSendPropInfo(serverClass, propName);
 
-	// Disable plugin if a networkable send property offset wasnt found
-	if (!entity)
+	// Disable plugin if a networkable send property offset was not found
+	if (info <= 0)
 	{
 		SetFailState("Unable to find offs \"%s::%s\"!", serverClass, propName);
 	}
 
-	return entity;
+	return info;
 }
