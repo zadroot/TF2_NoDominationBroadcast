@@ -41,6 +41,11 @@ public Plugin:myinfo =
  * ------------------------------------------------------------------ */
 public OnPluginStart()
 {
+	// Find the Dominations/Revenge netprops
+	m_bPlayerDominated    = FindSendPropInfoEx("CTFPlayer",         "m_bPlayerDominated");
+	m_bPlayerDominatingMe = FindSendPropInfoEx("CTFPlayer",         "m_bPlayerDominatingMe");
+	m_iActiveDominations  = FindSendPropInfoEx("CTFPlayerResource", "m_iActiveDominations");
+
 	// Create console variables
 	CreateConVar("sm_nodominations_version", PLUGIN_VERSION, PLUGIN_NAME, FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	nobroadcast = CreateConVar("sm_nodominations", "1", "Disable Domination & Revenge broadcasting?", FCVAR_PLUGIN, true, 0.0, true, 1.0);
@@ -48,11 +53,6 @@ public OnPluginStart()
 	// Always use pre hook mode if you want to block or rewrite an event
 	HookEvent("player_death",     OnPlayerDeath, EventHookMode_Pre);
 	HookConVarChange(nobroadcast, OnConVarChange);
-
-	// Find the Dominations/Revenge netprops
-	m_bPlayerDominated    = FindSendPropInfoEx("CTFPlayer",         "m_bPlayerDominated");
-	m_bPlayerDominatingMe = FindSendPropInfoEx("CTFPlayer",         "m_bPlayerDominatingMe");
-	m_iActiveDominations  = FindSendPropInfoEx("CTFPlayerResource", "m_iActiveDominations");
 
 #if defined _updater_included
 	if (LibraryExists("updater"))
@@ -161,14 +161,14 @@ SetNetProps(attacker, victim)
 	if (attacker && IsClientInGame(attacker))
 	{
 		// First remove 'DOMINATED' icon in a scoreboard
-		SetEntData(attacker, m_bPlayerDominated + victim, false, 4, true);
+		SetEntData(attacker, m_bPlayerDominated + victim, false, _, true);
 	}
 
 	// And victim
 	if (victim && IsClientInGame(victim))
 	{
 		// Then remove 'NEMESIS' icon in a scoreboard
-		SetEntData(victim, m_bPlayerDominatingMe + attacker, false, 4, true);
+		SetEntData(victim, m_bPlayerDominatingMe + attacker, false, _, true);
 	}
 }
 
