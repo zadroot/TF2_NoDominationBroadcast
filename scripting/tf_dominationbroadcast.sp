@@ -41,18 +41,18 @@ public Plugin:myinfo =
  * ------------------------------------------------------------------ */
 public OnPluginStart()
 {
-	// Find the Dominations/Revenge netprops
+	// Find the Dominations/Revenge netprops before hooking and creating
 	m_bPlayerDominated    = FindSendPropInfoEx("CTFPlayer",         "m_bPlayerDominated");
 	m_bPlayerDominatingMe = FindSendPropInfoEx("CTFPlayer",         "m_bPlayerDominatingMe");
 	m_iActiveDominations  = FindSendPropInfoEx("CTFPlayerResource", "m_iActiveDominations");
 
-	// Create console variables
+	// Create plugin's console variables
 	CreateConVar("sm_nodominations_version", PLUGIN_VERSION, PLUGIN_NAME, FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	nobroadcast = CreateConVar("sm_nodominations", "1", "Disable Domination & Revenge broadcasting?", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 
-	// Always use pre hook mode if you want to block or rewrite an event
-	HookEvent("player_death",     OnPlayerDeath, EventHookMode_Pre);
+	// Make some late-load hacks
 	HookConVarChange(nobroadcast, OnConVarChange);
+	OnConVarChange(nobroadcast, "0", "1");
 
 #if defined _updater_included
 	if (LibraryExists("updater"))
@@ -69,7 +69,6 @@ public OnPluginStart()
  * ------------------------------------------------------------------ */
 public OnLibraryAdded(const String:name[])
 {
-	// Make sure the 'updater' library were added
 	if (StrEqual(name, "updater"))
 	{
 		Updater_AddPlugin(UPDATE_URL);
@@ -82,7 +81,7 @@ public OnLibraryAdded(const String:name[])
  * ------------------------------------------------------------------ */
 public OnConfigsExecuted()
 {
-	// Plugin is enabled?
+	// Plugin is enabled ?
 	if (GetConVarBool(nobroadcast))
 	{
 		// Make sure we can hook PlayerResourceEntity
@@ -99,7 +98,7 @@ public OnConfigsExecuted()
  * ------------------------------------------------------------------ */
 public OnConVarChange(Handle:convar, const String:oldValue[], const String:newValue[])
 {
-	// Changed since SM 1.5
+	// Changed since SM 1.5+
 	new entity = GetPlayerResourceEntity();
 
 	// Get changed value
@@ -112,7 +111,8 @@ public OnConVarChange(Handle:convar, const String:oldValue[], const String:newVa
 		}
 		case true: // Otherwise hook everything back
 		{
-			SDKHook(entity, SDKHook_ThinkPost, OnResourceThink);
+			// Use _Pre event hook mode if you want to block or rewrite an event
+			SDKHookEx(entity, SDKHook_ThinkPost, OnResourceThink);
 			HookEvent("player_death", OnPlayerDeath, EventHookMode_Pre);
 		}
 	}
