@@ -21,7 +21,7 @@
 
 // ====[ VARIABLES ]=================================================
 new	Handle:nobroadcast = INVALID_HANDLE,
-	m_bPlayerDominated, m_bPlayerDominatingMe, m_iActiveDominations, // NetProps
+	m_bPlayerDominated, m_bPlayerDominatingMe, m_iActiveDominations, // Net Props
 	zeroCount[MAXPLAYERS + 1];
 
 // ====[ PLUGIN ]====================================================
@@ -32,7 +32,7 @@ public Plugin:myinfo =
 	description = "Disables Domination & Revenge broadcasting",
 	version     = PLUGIN_VERSION,
 	url         = "forums.alliedmods.net/showthread.php?p=1807594"
-};
+}
 
 
 /* OnPluginStart()
